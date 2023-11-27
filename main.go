@@ -9,6 +9,8 @@ import (
 
 func main() {
 
+	// ルーティングとは「サーバーが受け取った HTTP リクエストを、どのハンドラに渡して処理させるのかを決める」操作のこと
+	// ルーティング操作を担うものをルータ
 	http.HandleFunc("/hello", handlers.HelloHandler)
 	http.HandleFunc("/article", handlers.PostArticleHandler)
 	http.HandleFunc("/article/list", handlers.ArticleListHandler)
