@@ -5,13 +5,14 @@ import (
 
 	"github.com/expsh13/go-apiApp-book/models"
 	"github.com/expsh13/go-apiApp-book/repositories"
+	"github.com/expsh13/go-apiApp-book/repositories/testdata"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // SelectArticleList 関数のテスト
 func TestSelectArticleList(t *testing.T) {
 	// テスト対象の関数を実行
-	expectedNum := 2
+	expectedNum := len(testdata.ArticleTestData)
 	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -31,22 +32,10 @@ func TestSelectArticleDetail(t *testing.T) {
 	}{
 		{
 			testTitle: "subtest1",
-			expected: models.Article{
-				ID:       1,
-				Title:    "firstPost",
-				Contents: "This is my first blog",
-				UserName: "saki",
-				NiceNum:  2,
-			},
+			expected:  testdata.ArticleTestData[0],
 		}, {
 			testTitle: "subtest2",
-			expected: models.Article{
-				ID:       2,
-				Title:    "2nd",
-				Contents: "Second blog post",
-				UserName: "saki",
-				NiceNum:  4,
-			},
+			expected:  testdata.ArticleTestData[1],
 		},
 	}
 
@@ -98,5 +87,33 @@ func TestInsertArticle(t *testing.T) {
 		where title = ? and contents = ? and username = ?
 		`
 		testDB.Exec(sqlStr, article.Title, article.Contents, article.UserName)
+	})
+}
+
+// UpdateNiceNum関数のテスト
+func TestUpdateNiceNum(t *testing.T) {
+	articleID := 1
+	before, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal("fail to get before data")
+	}
+
+	err = repositories.UpdateNiceNum(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	after, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal("fail to get after data")
+	}
+
+	if after.NiceNum-before.NiceNum != 1 {
+		t.Error("fail to update nice num")
+	}
+	t.Cleanup(func() {
+
+		const sqlStr = `update articles set nice = ? where article_id = ?`
+		testDB.Exec(sqlStr, 2, articleID)
 	})
 }
