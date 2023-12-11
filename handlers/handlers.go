@@ -2,37 +2,38 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/expsh13/go-apiApp-book/models"
+	"github.com/expsh13/go-apiApp-book/services"
 	"github.com/gorilla/mux"
 )
 
-// ハンドラ宣言
-// HTTP リクエストを受け取って、それに対する HTTP レスポンスの内容をコネクションに書き込むもの
-// /hello のハンドラ
+// GET /hello のハンドラ
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Hello, world!\n")
 }
 
-// /article のハンドラ
+// POST /article のハンドラ
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-
 	var reqArticle models.Article
-
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	article := reqArticle
+	article, err := services.PostArticleService(reqArticle)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
 
 	json.NewEncoder(w).Encode(article)
 }
 
-// /article/list のハンドラ
+// GET /article/list のハンドラ
 func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	queryMap := req.URL.Query()
 
@@ -46,19 +47,20 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	} else {
-		page = 1
+		page = 2
 	}
 
-	// 暫定でこれを追加することで
-	// 「変数pageが使われていない」というコンパイルエラーを回避
-	log.Println(page)
+	articleList, err := services.GetArticleListService(page)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		fmt.Println("Error at:", err)
+		return
+	}
 
-	articleList := []models.Article{models.Article1, models.Article2}
 	json.NewEncoder(w).Encode(articleList)
-
 }
 
-// /article/1 のハンドラ
+// GET /article/{id} のハンドラ
 func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
@@ -66,34 +68,42 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println(articleID)
+	article, err := services.GetArticleService(articleID)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
 
-	article := models.Article1
 	json.NewEncoder(w).Encode(article)
 }
 
-// /article/nice のハンドラ
+// POST /article/nice のハンドラ
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
-
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	article := reqArticle
+	article, err := services.PostNiceService(reqArticle)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
 
 	json.NewEncoder(w).Encode(article)
 }
 
-// /comment のハンドラ
+// POST /comment のハンドラ
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 	var reqComment models.Comment
-
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	comment := reqComment
-
+	comment, err := services.PostCommentService(reqComment)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
 	json.NewEncoder(w).Encode(comment)
 }

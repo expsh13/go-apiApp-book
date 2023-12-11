@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/expsh13/go-apiApp-book/models"
 	"github.com/expsh13/go-apiApp-book/repositories"
 )
@@ -48,14 +50,15 @@ func PostArticleService(article models.Article) (models.Article, error) {
 // ArticleListHandler で使うことを想定したサービス
 // 指定 page の記事一覧を返却
 func GetArticleListService(page int) ([]models.Article, error) {
-	// TODO : 実装
 	db, err := connectDB()
 	if err != nil {
+		fmt.Println("db not connect")
 		return nil, err
 	}
 	defer db.Close()
 	articleArray, err := repositories.SelectArticleList(db, page)
 	if err != nil {
+		fmt.Println("cannot get data")
 		return nil, err
 	}
 

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/expsh13/go-apiApp-book/models"
 )
@@ -31,13 +32,14 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 // 投稿一覧をDBから取得する関数
 func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	const sqlStr = `
-	select article_id, title, contents, username, nice
-	from articles
-	limit ? offset ?;
+		select article_id, title, contents, username, nice
+		from articles
+		limit ? offset ?;
 	`
 
 	rows, err := db.Query(sqlStr, articleNumPerPage, ((page - 1) * articleNumPerPage))
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
