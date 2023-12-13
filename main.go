@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/expsh13/go-apiApp-book/controllers"
-	"github.com/expsh13/go-apiApp-book/routers"
-	"github.com/expsh13/go-apiApp-book/services"
+	"github.com/expsh13/go-apiApp-book/api"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
@@ -29,10 +27,7 @@ func main() {
 		return
 	}
 
-	ser := services.NewMyAppService(db)
-	con := controllers.NewMyAppController(ser)
-
-	r := routers.NewRouter(con)
+	r := api.NewRouter(db)
 
 	log.Println("server start at port 8080")
 	// http.ListenAndServe 関数にてサーバーを起動する際に、第二引数に gorilla/mux のルータを明示的に渡す
