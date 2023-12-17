@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/expsh13/go-apiApp-book/api/middlewares"
 	"github.com/expsh13/go-apiApp-book/controllers"
 	"github.com/expsh13/go-apiApp-book/services"
 	"github.com/gorilla/mux"
@@ -25,6 +26,8 @@ func NewRouter(db *sql.DB) *mux.Router {
 	r.HandleFunc("/article/nice", aCon.PostNiceHandler).Methods(http.MethodPost)
 
 	r.HandleFunc("/comment", cCon.PostCommentHandler).Methods(http.MethodPost)
+
+	r.Use(middlewares.LoggingMiddleware)
 	// の対応付けが完了した状態のルータを返す
 	return r
 }
